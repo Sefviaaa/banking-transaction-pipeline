@@ -2,29 +2,29 @@
 This project implements an automated batch data pipeline that processes banking transaction data for reliable end-of-day and monthly reporting. The pipeline ingests raw transaction data, stores it in a data lake, loads it into a data warehouse, and transforms it into analytics-ready tables designed for operational and management reporting.
 
 
-## Problem Statement
+### Problem Statement
 
 
-## Dataset
+### Dataset
 
 
-## Architecture Overview
+### Architecture Overview
 
 
-## Data Modeling
+### Data Modeling
 
 
-## Orchestration
+### Orchestration
 
 
-## Data Quality Checks
+### Data Quality Checks
 
 
-## Dashboard
+### Dashboard
 
 
-## How to Run
+### How to Run
 
 
-## Project Structure
+### Project Structure
 
