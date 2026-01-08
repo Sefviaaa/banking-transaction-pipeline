@@ -31,7 +31,30 @@ This project uses a publicly available [IBM synthetic dataset](https://www.kaggl
 
 The data is used to model batch-oriented banking workflows, including transaction ingestion, settlement reporting, reconciliation, and aggregated financial reporting. As the dataset is synthetic, it contains no real customer information and is suitable for demonstrating data engineering pipelines in a banking context.
 
-### Architecture Overview
+### Tech Stack
+Containerization Platform: Docker**
+Docker is used to provide standardized and isolated execution environments for each component of the data pipeline. By packaging services such as Apache Airflow and supporting dependencies into containers, Docker ensures consistent behavior across development and deployment environments. This approach simplifies environment setup, reduces configuration issues, and improves reproducibility of the data pipeline.
+
+**Cloud Platform: Google Cloud Platform (GCP)**
+Google Cloud Platform serves as the primary cloud infrastructure for this project. GCP provides reliable, scalable, and cost-effective services that are well-suited for data-intensive workloads. The project leverages GCP to store transaction data, execute batch processing workflows, and support analytical querying in a cloud-native environment.
+
+**Infrastructure as Code: Terraform**
+Terraform is used to provision and manage cloud resources on GCP using declarative configuration files. Infrastructure components such as storage buckets, data warehouse datasets, and service configurations are defined as code, enabling repeatable deployments, version control, and consistent infrastructure management across environments.
+
+**Workflow Orchestration: Apache Airflow**
+Apache Airflow is responsible for orchestrating the batch data pipeline. Using Python-defined DAGs (Directed Acyclic Graphs), Airflow schedules and coordinates each stage of the pipeline, including data ingestion, loading, and transformation tasks. Airflow also provides monitoring, logging, and retry mechanisms, ensuring reliability and operational visibility of batch workflows.
+
+**Data Ingestion & Processing: Python**
+Python is used for data ingestion and preprocessing tasks, including reading transaction data, validating schemas, and performing basic data quality checks before loading the data into downstream systems. Python’s flexibility and extensive ecosystem make it well-suited for implementing controlled, batch-oriented data processing logic in a banking context.
+
+**Data Transformation: dbt**
+dbt (data build tool) is used to perform data transformations within the data warehouse. Using SQL-based models, dbt enables structured transformation of raw transaction data into cleaned, aggregated, and reporting-ready tables. dbt also supports testing and documentation, helping ensure data consistency, correctness, and maintainability.
+
+**Storage & Data Warehousing: Google Cloud Storage (GCS) and BigQuery**
+Google Cloud Storage acts as the data lake layer, storing raw and intermediate transaction data in an immutable and auditable format. BigQuery serves as the analytical data warehouse, where transformed data is organized into reporting tables optimized for query performance. This separation supports traceability, scalability, and efficient batch analytics.
+
+**Visualization: Looker Studio**
+Looker Studio is used to create interactive dashboards and reports based on curated data stored in BigQuery. These visualizations enable users to analyze inter-bank transaction volumes, settlement amounts, and trends across time periods, banks, currencies, and payment formats. The dashboards support operational and management reporting needs in a clear and accessible manner.
 
 
 ### Data Modeling
