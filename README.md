@@ -32,7 +32,7 @@ This project uses a publicly available [IBM synthetic dataset](https://www.kaggl
 The data is used to model batch-oriented banking workflows, including transaction ingestion, settlement reporting, reconciliation, and aggregated financial reporting. As the dataset is synthetic, it contains no real customer information and is suitable for demonstrating data engineering pipelines in a banking context.
 
 ### Tech Stack
-Containerization Platform: Docker**
+**Containerization Platform: Docker**
 Docker is used to provide standardized and isolated execution environments for each component of the data pipeline. By packaging services such as Apache Airflow and supporting dependencies into containers, Docker ensures consistent behavior across development and deployment environments. This approach simplifies environment setup, reduces configuration issues, and improves reproducibility of the data pipeline.
 
 **Cloud Platform: Google Cloud Platform (GCP)**
