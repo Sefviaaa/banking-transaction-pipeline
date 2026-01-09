@@ -13,7 +13,7 @@ This project is motivated by the need to simulate how banks handle inter-bank pa
 ### Overview
 This project implements an end-to-end batch data engineering pipeline for processing inter-bank payment transactions. The pipeline ingests synthetic inter-bank transaction data containing information such as originating and receiving banks, account identifiers, transaction timestamps, payment amounts, currencies, and payment formats (e.g., wire transfer, ACH, cheque).
 
-The data pipeline follows a layered architecture, where raw transaction data is first stored in a data lake to preserve the original records for audit and traceability purposes. The data is then loaded into a data warehouse, where transformations are applied to clean, normalize, and aggregate the data into reporting-ready tables. These transformations support common banking use cases such as settlement summaries, reconciliation checks, and transaction volume analysis across time periods, banks, and payment formats.
+The data pipeline follows a layered architecture, where raw transaction data is first stored in a data lake to preserve the original records for audit and traceability purposes. The data is then loaded into a data warehouse, where transformations are applied to clean, normalize, and aggregate the data into reporting-ready tables. 
 
 Workflow orchestration is handled using Apache Airflow, enabling the pipeline to run on a scheduled basis and ensuring that each stage of the data lifecycle—ingestion, loading, transformation, and reporting—is executed in a controlled and repeatable manner. This design emphasizes reliability, data quality, and maintainability, which are critical requirements in banking data environments.
 
@@ -24,12 +24,18 @@ The final output of the project consists of structured reporting tables and visu
 - Support reconciliation and operational reporting needs  
 - Demonstrate how batch data pipelines are used in real-world banking systems  
 
-Through this project, I aim to demonstrate the practical application of data engineering principles in a banking context, focusing on building robust and auditable batch pipelines. The project reflects how data engineers contribute to the stability and reliability of core banking operations.
-
 ### Dataset
-This project uses a publicly available [IBM synthetic dataset](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml/data?select=HI-Medium_Trans.csv) that simulates inter-bank payment transactions. The dataset represents money transfers between originating and receiving banks, including account identifiers, transaction timestamps, payment amounts, currencies, and payment formats such as ACH, wire, and cheque.
+* Source: IBM Synthetic AML Transaction Dataset ([Kaggle](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml/data?select=HI-Medium_Trans.csv))
+* File used: `LI-Medium_Trans.csv`
+* Characteristics:
 
-The data is used to model batch-oriented banking workflows, including transaction ingestion, settlement reporting, reconciliation, and aggregated financial reporting. As the dataset is synthetic, it contains no real customer information and is suitable for demonstrating data engineering pipelines in a banking context.
+  * Interbank transfers
+  * Timestamps
+  * Bank & account identifiers
+  * Amounts & currencies
+  * Payment formats
+
+This dataset is **fully synthetic** and safe for demonstration purposes.
 
 ### Tech Stack
 **Containerization Platform: Docker**
@@ -56,21 +62,202 @@ Google Cloud Storage acts as the data lake layer, storing raw and intermediate t
 **Visualization: Looker Studio**
 Looker Studio is used to create interactive dashboards and reports based on curated data stored in BigQuery. These visualizations enable users to analyze inter-bank transaction volumes, settlement amounts, and trends across time periods, banks, currencies, and payment formats. The dashboards support operational and management reporting needs in a clear and accessible manner.
 
+## High-Level Architecture
 
-### Data Modeling
+```
+CSV (Local)
+  ↓
+Google Cloud Storage (Raw Layer)
+  ↓
+BigQuery (interbank_raw)
+  ↓
+dbt (Staging & Marts)
+  ↓
+Analytics-Ready Tables
+```
 
+### Orchestration Flow
 
-### Orchestration
+```
+Airflow DAG
+└── ingest_to_gcs
+    └── load_gcs_to_bigquery
+        └── trigger_dbt_cloud_job
+```
 
+Project Structure
 
-### Data Quality Checks
+```
+banking-transaction-pipeline/
+├── ingestion/
+│   ├── load_to_gcs.py
+│   └── load_gcs_bq.py
+│
+├── orchestration/
+│   ├── dags/
+│   │   └── interbank_batch_dag.py
+│   ├── docker-compose.yml
+│   └── credentials/
+│       └── credentials.json   # NOT committed
+│
+├── dbt/
+│   ├── models/
+│   │   ├── staging/
+│   │   └── marts/
+│   └── dbt_project.yml
+│
+├── infra/
+│   └── terraform/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+│
+└── README.md
+```
+## Prerequisites
+## Infrastructure (Terraform)
 
+Terraform is used to **declare and manage cloud infrastructure**, ensuring the project can be recreated consistently.
 
-### Dashboard
+### Managed Resources
 
+* Google Cloud Storage bucket (raw data lake)
+* BigQuery datasets:
 
-### How to Run
+  * `interbank_raw` – raw ingestion layer
+  * `interbank_dbt_dev` – dbt development / staging
+  * `interbank_prod` – production marts
 
+> Terraform **does NOT run pipelines**.
+> It only guarantees that required infrastructure exists.
 
-### Project Structure
+### Apply Infrastructure
+
+```bash
+cd infra/terraform
+terraform init
+terraform apply
+```
+
+---
+
+## Credentials & Environment Variables
+
+### Google Cloud Credentials
+
+Create a GCP Service Account with:
+
+* BigQuery Admin (or scoped equivalent)
+* Storage Object Admin
+
+Download the JSON key and place it here:
+
+```
+orchestration/credentials/credentials.json
+```
+
+Airflow containers mount this file internally.
+
+---
+
+### Required Environment Variables
+
+These **must be set before running Airflow**:
+
+```bash
+# GCP
+GOOGLE_APPLICATION_CREDENTIALS=/opt/airflow/google/credentials.json
+GCP_PROJECT_ID=your-gcp-project-id
+GCS_BUCKET=banking-datalake
+
+# dbt Cloud
+DBT_CLOUD_ACCOUNT_ID=your_account_id
+DBT_CLOUD_API_TOKEN=your_api_token
+DBT_CLOUD_JOB_ID=your_job_id
+```
+
+They are consumed by:
+
+* Python ingestion scripts
+* Airflow DAG (`Variable.get` / env access)
+* dbt Cloud API trigger
+
+## How to Reproduce
+Running the Pipeline Locally
+
+### 1. Start Airflow (Docker)
+
+```bash
+cd orchestration
+docker compose up
+```
+
+Services started:
+
+* PostgreSQL (Airflow metadata DB)
+* Airflow Webserver
+* Airflow Scheduler
+
+Airflow UI:
+
+```
+http://localhost:8080
+```
+
+---
+
+### 2. Trigger the Pipeline
+
+In Airflow UI:
+
+* Enable DAG: `interbank_batch_pipeline`
+* Trigger manually or wait for schedule
+
+Pipeline steps:
+
+1. Upload CSV to GCS
+2. Load data into BigQuery (`interbank_raw.transactions`)
+3. Trigger dbt Cloud job
+
+---
+
+## dbt Transformations
+
+### Staging Layer
+
+* Type casting
+* Timestamp normalization
+* Column standardization
+
+### Dimension Tables
+
+* `dim_bank`
+* `dim_currency`
+
+### Fact Table
+
+* `fact_transactions_daily`
+
+  * Daily transaction counts
+  * Total transaction amounts
+  * Grouped by bank and currency
+
+### Report Table
+
+* `rpt_bank_daily_volume`
+
+  * Bank-level daily transaction volume
+
+---
+
+## Data Quality & Testing
+
+Implemented using dbt tests:
+
+* `not_null` checks
+* Referential integrity (`relationships`)
+* Aggregation consistency
+
+These ensure analytical outputs remain reliable and auditable.
+
 
