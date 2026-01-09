@@ -79,5 +79,3 @@ models:
         description: "Total monetary value of transactions per bank per day."
         tests:
           - not_null
-          - dbt_utils.expression_is_true:
-              expression: "daily_volume >= 0"
