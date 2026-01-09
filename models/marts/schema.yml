@@ -6,6 +6,17 @@ models:
       Daily aggregated interbank transactions by originating bank and currency.
       This fact table provides transaction volume and monetary metrics for
       analytical and reporting purposes.
+    
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - transaction_date
+            - bank_code
+            - currency_code
+      - dbt_utils.expression_is_true:
+          expression: "total_amount_paid >= 0"
+
+
 
     columns:
       - name: transaction_date
@@ -68,3 +79,5 @@ models:
         description: "Total monetary value of transactions per bank per day."
         tests:
           - not_null
+          - dbt_utils.expression_is_true:
+              expression: "daily_volume >= 0"
