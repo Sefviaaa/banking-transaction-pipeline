@@ -1,5 +1,5 @@
 SELECT
-  CAST(timestamp AS TIMESTAMP) AS transaction_ts,
+  timestamp AS transaction_ts,
   from_bank,
   from_account,
   to_bank,
