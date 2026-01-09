@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: stg_interbank_transactions
+    description: "Standardized and cleaned interbank transaction data derived from the raw
+      ingestion layer. This staging model performs basic data type casting,
+      normalization, and null filtering."
+    columns:
+      - name: transaction_ts
+        data_type: timestamp
+        description: "Timestamp indicating when the transaction occurred."
+        tests:
+          - not_null
+
+      - name: from_bank
+        data_type: string
+        description: "Originating bank code of the transaction."
+        tests:
+          - not_null
+
+      - name: from_account
+        data_type: string
+        description: "Unique identifier of the originating account that initiated the transaction."
+        tests:
+          - not_null
+
+      - name: to_bank
+        data_type: string
+        description: "Code of the destination bank receiving the transaction."
+
+      - name: to_account
+        data_type: string
+        description: "Unique identifier of the destination account receiving the transaction."
+
+      - name: amount_received
+        data_type: float64
+        description: "Monetary amount received by the destination account in the receiving currency."
+
+      - name: receiving_currency
+        data_type: string
+        description: "Currency in which the destination account received the funds."
+
+      - name: amount_paid
+        data_type: float64
+        description: "Monetary amount paid by the originating account in the payment currency."
+        tests:
+          - not_null
+
+      - name: payment_currency
+        data_type: string
+        description: "Currency used by the originating account to perform the transaction."
+
+      - name: payment_format
+        data_type: string
+        description: "Method used to execute the transaction, such as wire transfer,
+          ACH, credit card, or other payment channels."
