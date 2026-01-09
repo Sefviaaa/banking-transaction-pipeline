@@ -225,3 +225,6 @@ dbt_packages/
 logs/
 data/
 ingestion/data/
+
+# obsidian
+.obsidian/
