@@ -1,0 +1,13 @@
+[
+  { "name": "timestamp", "type": "TIMESTAMP" },
+  { "name": "from_bank", "type": "STRING" },
+  { "name": "from_account", "type": "STRING" },
+  { "name": "to_bank", "type": "STRING" },
+  { "name": "to_account", "type": "STRING" },
+  { "name": "amount_received", "type": "FLOAT" },
+  { "name": "receiving_currency", "type": "STRING" },
+  { "name": "amount_paid", "type": "FLOAT" },
+  { "name": "payment_currency", "type": "STRING" },
+  { "name": "payment_format", "type": "STRING" }
+]
+

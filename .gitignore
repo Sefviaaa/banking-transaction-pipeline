@@ -1,3 +1,16 @@
+# Terraform
+*.tfstate
+*.tfstate.backup
+.terraform/
+
+# Airflow
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+credentials.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

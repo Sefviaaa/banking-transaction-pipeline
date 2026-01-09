@@ -11,14 +11,10 @@
             "id": "7027a288058625cf",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "README.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "README"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -78,8 +74,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "9a0820df993664ec",
@@ -183,6 +178,31 @@
   },
   "active": "7027a288058625cf",
   "lastOpenFiles": [
+    "Untitled.canvas",
+    "2026-01-09.md",
+    "Untitled.base",
+    "Untitled.md",
+    "orchestration/credentials/credentials.json",
+    "orchestration/credentials/credentials.json.example",
+    "orchestration/credentials",
+    "Simplified Readme.md",
+    "infra/terraform/terraform.tfstate.backup",
+    "infra/terraform/terraform.tfstate",
+    "infra/terraform/outputs.tf",
+    "infra/terraform/terraform.tfvars",
+    "infra/terraform/variables.tf",
+    "infra/terraform/main.tf",
+    "Data Engineering.md",
+    "images/Pasted image 20260109134025.png",
+    "images/Pasted image 20260109134016.png",
+    "images/Pasted image 20260109134011.png",
+    "images/Pasted image 20260109133956.png",
+    "images/Pasted image 20260109133951.png",
+    "images/Pasted image 20260109121112.png",
+    "images/Pasted image 20260109121047.png",
+    "images/Pasted image 20260109121032.png",
+    "images/Pasted image 20260109121016.png",
+    "images/Pasted image 20260109133943.png",
     "README.md"
   ]
 }
