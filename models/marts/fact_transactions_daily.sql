@@ -1,3 +1,12 @@
+{{ config(
+    materialized='table',
+    partition_by={
+      "field": "transaction_date",
+      "data_type": "date"
+    },
+    cluster_by=["bank_code", "currency_code"]
+) }}
+
 SELECT
   DATE(transaction_ts) AS transaction_date,
   from_bank AS bank_code,
