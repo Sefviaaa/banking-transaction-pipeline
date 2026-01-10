@@ -35,4 +35,20 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install dbt-bigquery
-      - run: cd dbt && dbt deps && dbt parse
+      - name: Create dummy profiles.yml for CI
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          banking_transaction_pipeline:
+            target: ci
+            outputs:
+              ci:
+                type: bigquery
+                method: oauth
+                project: ci-dummy-project
+                dataset: ci_dummy_dataset
+                location: US
+                threads: 1
+          EOF
+      - name: Validate dbt project
+        run: cd dbt && dbt deps && dbt parse
