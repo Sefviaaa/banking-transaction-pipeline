@@ -38,6 +38,6 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   banking_transaction_pipeline:
     staging:
-      materialized: view
+      +materialized: view
     marts:
-      materialized: table
+      +materialized: table

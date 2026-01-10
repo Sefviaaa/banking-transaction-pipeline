@@ -15,7 +15,6 @@ BUCKET_NAME = os.environ.get("GCS_RAW_BUCKET", "banking-datalake")
 LOCAL_DATA_PATH = "/opt/airflow/ingestion/data/raw/LI-Medium_Trans.csv"
 GCS_BASE_PATH = "interbank_transactions"
 
-## SOURCE_PATH = "../data/raw/LI-Medium_Trans.csv"
 
 def upload_to_gcs():
     """Uploads a file to Google Cloud Storage."""
@@ -23,17 +22,17 @@ def upload_to_gcs():
         # Validate environment variables
         if not BUCKET_NAME:
             raise ValueError("GCS_RAW_BUCKET environment variable not set")
-        
+
         if not os.path.exists(LOCAL_DATA_PATH):
             raise FileNotFoundError(f"Source file not found: {LOCAL_DATA_PATH}")
-        
+
         # Create a client
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
-        
+
         ingestion_date = datetime.utcnow().strftime("%Y-%m-%d")
         destination_blob = f"raw/interbank_transactions/ingestion_date={ingestion_date}/transactions.csv"
-        
+
         # Create a blob object
         blob = bucket.blob(destination_blob)
 
@@ -41,9 +40,9 @@ def upload_to_gcs():
 
         # Upload the file
         blob.upload_from_filename(LOCAL_DATA_PATH)
-        
+
         logger.info(f"Successfully uploaded to gs://{BUCKET_NAME}/{destination_blob}")
-    
+
     except FileNotFoundError:
         logger.error(f"Source file not found: {LOCAL_DATA_PATH}")
         raise
@@ -53,6 +52,7 @@ def upload_to_gcs():
     except Exception as e:
         logger.error(f"Unexpected error during upload: {e}")
         raise
+
 
 if __name__ == "__main__":
     upload_to_gcs()

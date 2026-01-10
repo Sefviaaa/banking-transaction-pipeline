@@ -47,10 +47,10 @@ def load_gcs_to_bq():
         logger.info("Starting BigQuery load operation")
         client = bigquery.Client(project=PROJECT_ID)
 
-        # 1️⃣ ENSURE DATASET EXISTS 
+        # 1️⃣ ENSURE DATASET EXISTS
         ensure_dataset(client, DATASET_ID)
 
-        # 2️⃣ DEFINE SCHEMA 
+        # 2️⃣ DEFINE SCHEMA
         schema = [
             bigquery.SchemaField("timestamp", "TIMESTAMP"),
             bigquery.SchemaField("from_bank", "STRING"),
@@ -85,10 +85,10 @@ def load_gcs_to_bq():
             job_config=job_config,
         )
 
-        load_job.result()  
+        load_job.result()
 
         logger.info(f"Successfully loaded data into {table_ref}")
-    
+
     except GoogleAPIError as e:
         logger.error(f"BigQuery operation failed: {e}")
         raise
