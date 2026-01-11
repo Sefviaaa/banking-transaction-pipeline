@@ -1,3 +1,5 @@
+<<<<<<< HEAD
+=======
 # macOS
 .DS_Store
 
@@ -221,13 +223,17 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+>>>>>>> eaaa66f1a447b8e857a80c88e218ca763a602b67
 # you shouldn't commit these into source control
 # these are the default directory names, adjust/add to fit your needs
 target/
 dbt_packages/
 logs/
+<<<<<<< HEAD
+=======
 data/
 ingestion/data/
 
 # obsidian
 .obsidian/
+>>>>>>> eaaa66f1a447b8e857a80c88e218ca763a602b67
