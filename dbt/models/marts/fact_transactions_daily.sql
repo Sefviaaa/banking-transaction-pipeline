@@ -1,17 +1,13 @@
-{{ config(
-    materialized='table',
-    partition_by={
-      "field": "transaction_date",
-      "data_type": "date"
-    },
-    cluster_by=["bank_code", "currency_code"]
-) }}
+{{ config(materialized='table') }}
 
+-- Aggregated daily summary from fact
 SELECT
-  DATE(transaction_ts) AS transaction_date,
+  transaction_date,
   from_bank AS bank_code,
   payment_currency AS currency_code,
   COUNT(*) AS total_transactions,
-  SUM(amount_paid) AS total_amount_paid
-FROM {{ ref('stg_interbank_transactions') }}
-GROUP BY 1,2,3
+  SUM(amount_paid) AS total_amount_paid,
+  SUM(amount_received) AS total_amount_received,
+  AVG(amount_paid) AS avg_transaction_amount
+FROM {{ ref('fact_transactions') }}
+GROUP BY 1, 2, 3
