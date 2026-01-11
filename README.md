@@ -56,6 +56,15 @@ The final output of the project consists of structured reporting tables and visu
 - Support reconciliation and operational reporting needs
 - Detect potential risk patterns and anomalies
 
+
+### Dashboard 
+The dashboard can be accessed via [Looker Studio](https://lookerstudio.google.com/reporting/3e5c5ca1-4f0a-4bdc-966a-fe3b4264704a)
+
+<img width="892" height="667" alt="Executive Summary Dashboard" src="https://github.com/user-attachments/assets/7e66e830-4a6c-4be1-ab42-74e664d71000" />
+<img width="874" height="654" alt="Operational Monitoring Dashboard" src="https://github.com/user-attachments/assets/155820c9-b522-4cf3-b1b8-ad06cfe770f1" />
+<img width="874" height="653" alt="Risk Analytics Dashboard" src="https://github.com/user-attachments/assets/77da36ae-a208-4b47-a3a9-29280482c205" />
+
+
 ---
 
 ## Dataset
@@ -478,16 +487,7 @@ The pipeline includes three Looker Studio dashboards for different stakeholders:
 - Flag Rate by Value Tier (Bar Chart)
 - Bank-to-Bank Flow Matrix (Pivot Heatmap)
 - Top Suspicious Bank Pairs (Table)
-
-### Live Dashboard 
-The dashboard can be accessed via [Looker Studio](https://lookerstudio.google.com/reporting/3e5c5ca1-4f0a-4bdc-966a-fe3b4264704a)
-
-<img width="892" height="667" alt="Executive Summary Dashboard" src="https://github.com/user-attachments/assets/7e66e830-4a6c-4be1-ab42-74e664d71000" />
-<img width="874" height="654" alt="Operational Monitoring Dashboard" src="https://github.com/user-attachments/assets/155820c9-b522-4cf3-b1b8-ad06cfe770f1" />
-<img width="874" height="653" alt="Risk Analytics Dashboard" src="https://github.com/user-attachments/assets/77da36ae-a208-4b47-a3a9-29280482c205" />
-
-
-
+  
 ## Project Structure
 ```
 banking-transaction-pipeline/
