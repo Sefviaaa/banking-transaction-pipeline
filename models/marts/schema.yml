@@ -79,3 +79,50 @@ models:
         description: "Total monetary value of transactions per bank per day."
         tests:
           - not_null
+
+  - name: rpt_hourly_volume
+    description: "Hourly transaction volume aggregation for heatmap visualization"
+    columns:
+      - name: transaction_date
+        tests:
+          - not_null
+      - name: transaction_hour
+        tests:
+          - not_null
+
+  - name: rpt_currency_flow
+    description: "Currency exchange flow analysis between payment and receiving currencies"
+    columns: 
+      - name: source_currency
+        tests:
+          - not_null
+      - name: target_currency
+        tests:
+          - not_null
+
+  - name: rpt_bank_flow_matrix
+    description:  "Bank-to-bank transaction flow matrix for network analysis"
+    columns:
+      - name: from_bank
+        tests:
+          - not_null
+      - name: to_bank
+        tests:
+          - not_null
+
+  - name: rpt_risk_summary
+    description: "Risk and anomaly detection summary with flagged transaction rates"
+    columns:
+      - name: transaction_date
+        tests:
+          - not_null
+      - name: flag_rate_pct
+        description: "Percentage of transactions flagged as suspicious"
+
+  - name: rpt_pipeline_health
+    description: "Pipeline health monitoring metrics for operational dashboards"
+    columns:
+      - name: transaction_date
+        tests:
+          - not_null
+          - unique
