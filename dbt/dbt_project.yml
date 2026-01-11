@@ -1,3 +1,4 @@
+
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
@@ -6,7 +7,7 @@ version: '1.0.0'
 config-version: 2
 
 # This setting configures which "profile" dbt uses for this project.
-profile: 'banking_transaction_pipeline'
+profile: 'default'
 
 # These configurations specify where dbt should look for different types of files.
 # The `model-paths` config, for example, states that models in this project can be
@@ -37,6 +38,6 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   banking_transaction_pipeline:
     staging:
-      +materialized: view
+      materialized: view
     marts:
-      +materialized: table
+      materialized: table

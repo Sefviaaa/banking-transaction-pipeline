@@ -1,8 +1,0 @@
-version: 2
-
-sources:
-  - name: interbank_raw
-    database: noted-aloe-481504-u4
-    schema: interbank_raw
-    tables:
-      - name: transactions
