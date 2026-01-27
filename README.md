@@ -15,6 +15,7 @@ The pipeline emphasizes:
 - [Problem Statement](#problem-statement)
 - [Overview](#overview)
 - [Dataset](#dataset)
+- [Architecture](#architecture)
 - [High-Level Architecture](#high-level-architecture)
 - [Tech Stack](#tech-stack)
 - [Prerequisites](#prerequisites)
@@ -56,6 +57,8 @@ The final output of the project consists of structured reporting tables and visu
 - Support reconciliation and operational reporting needs
 - Detect potential risk patterns and anomalies
 
+## Architecture
+![Architecture Diagram](./docs/Pipeline_Architecture.png)
 
 ### Dashboard 
 The dashboard can be accessed via [Looker Studio](https://lookerstudio.google.com/reporting/3e5c5ca1-4f0a-4bdc-966a-fe3b4264704a)
