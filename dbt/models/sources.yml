@@ -2,7 +2,19 @@ version: 2
 
 sources:
   - name: interbank_raw
+    description: "Raw interbank transaction data ingested from GCS"
     database: noted-aloe-481504-u4
     schema: interbank_raw
+    
+    # Freshness monitoring - alerts when data is stale
+    freshness:
+      warn_after: {count: 24, period: hour}
+      error_after: {count: 48, period: hour}
+    loaded_at_field: timestamp  # Column to check for freshness
+    
     tables:
       - name: transactions
+        description: "Raw transaction records from inter-bank payments"
+        columns:
+          - name: timestamp
+            description: "Transaction timestamp used for freshness checks"

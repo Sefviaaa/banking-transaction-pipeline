@@ -46,6 +46,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ../ingestion:/opt/airflow/ingestion
       - ../dbt:/opt/airflow/dbt
+      - ../great_expectations:/opt/airflow/great_expectations
       - ./credentials:/opt/airflow/google
     ports:
       - "8080:8080"
@@ -64,6 +65,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ../ingestion:/opt/airflow/ingestion
       - ../dbt:/opt/airflow/dbt
+      - ../great_expectations:/opt/airflow/great_expectations
       - ./credentials:/opt/airflow/google
     command: scheduler
 

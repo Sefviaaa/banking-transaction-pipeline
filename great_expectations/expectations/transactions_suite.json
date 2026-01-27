@@ -1,0 +1,86 @@
+{
+  "expectation_suite_name": "transactions_suite",
+  "ge_cloud_id": null,
+  "meta": {
+    "great_expectations_version": "0.18.0"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {"column": "timestamp"},
+      "meta": {"notes": "Core transaction timestamp must exist"}
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {"column": "from_bank"},
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {"column": "to_bank"},
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_to_exist",
+      "kwargs": {"column": "amount_paid"},
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "timestamp"},
+      "meta": {"notes": "Transaction timestamp cannot be null"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "from_bank"},
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {"column": "amount_paid"},
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "amount_paid",
+        "min_value": 0,
+        "max_value": null
+      },
+      "meta": {"notes": "Transaction amounts must be non-negative"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "amount_received",
+        "min_value": 0,
+        "max_value": null
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "is_laundering",
+        "value_set": [0, 1]
+      },
+      "meta": {"notes": "AML flag must be 0 or 1"}
+    },
+    {
+      "expectation_type": "expect_column_values_to_match_regex",
+      "kwargs": {
+        "column": "payment_currency",
+        "regex": "^[A-Z]{2,4}$"
+      },
+      "meta": {"notes": "Currency codes should be 2-4 uppercase letters"}
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "min_value": 1,
+        "max_value": null
+      },
+      "meta": {"notes": "Table should not be empty"}
+    }
+  ]
+}
