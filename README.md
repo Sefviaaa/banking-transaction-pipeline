@@ -8,6 +8,7 @@ The pipeline emphasizes:
 * Batch correctness over real-time complexity
 * Clear separation of raw, staging, and reporting layers
 * Reproducibility using Infrastructure as Code and containerized orchestration
+* **Production-grade patterns**: incremental processing, data quality validation, source freshness monitoring
 
 ---
 ## Table of Contents
@@ -110,9 +111,10 @@ Looker Studio Dashboards
 
 ```
 Airflow DAG: interbank_batch_pipeline
-└── ingest_to_gcs
-    └── load_gcs_to_bigquery
-        └── trigger_dbt_cloud_job
+└── ingest_to_gcs           # Upload CSV to Cloud Storage
+    └── load_gcs_to_bigquery    # Load raw data to BigQuery
+        └── validate_data_quality   # Great Expectations checks
+            └── trigger_dbt_cloud_job   # Run transformations
 ```
 
 ---
@@ -127,6 +129,7 @@ Airflow DAG: interbank_batch_pipeline
 | Infrastructure | Terraform | Infrastructure as Code |
 | Orchestration | Apache Airflow | Workflow scheduling |
 | Transformation | dbt Cloud | SQL-based transformations |
+| Data Quality | Great Expectations | Data validation framework |
 | Ingestion | Python | Data loading scripts |
 | Containerization | Docker | Local reproducible runtime |
 | Visualization | Looker Studio | Reporting dashboards |
@@ -420,14 +423,53 @@ stg_interbank_transactions (staging)
 
 ## Data Quality & Testing
 
-Implemented using dbt tests:
+This project implements a **multi-layered data quality strategy**:
+
+### Great Expectations Validation
+
+Before dbt transformations run, the pipeline validates raw data using Great Expectations:
+
+| Check | Description |
+|-------|-------------|
+| `expect_column_values_to_not_be_null` | Critical fields (timestamp, from_bank, amount) must exist |
+| `expect_column_values_to_be_positive` | Transaction amounts must be >= 0 |
+| `expect_column_values_to_be_in_set` | AML flag must be 0 or 1 |
+| `expect_table_row_count_to_be_between` | Table must not be empty |
+
+If validation fails, the pipeline stops before running expensive transformations.
+
+### dbt Tests
 
 * `not_null` checks on critical fields
 * `unique` constraints on primary keys
 * Referential integrity (`relationships`)
-* Custom metric sanity checks
+* Custom metric sanity checks using `dbt_utils`
 
-These ensure analytical outputs remain **consistent, auditable, and trustworthy**.
+### Source Freshness Monitoring
+
+Configured in `sources.yml` to detect stale data:
+
+```yaml
+freshness:
+  warn_after: {count: 24, period: hour}
+  error_after: {count: 48, period: hour}
+```
+
+Run `dbt source freshness` to check data recency.
+
+### Incremental Processing
+
+The `fact_transactions` model uses **incremental materialization** for efficiency:
+
+```sql
+{{ config(materialized='incremental', unique_key='transaction_id') }}
+
+{% if is_incremental() %}
+WHERE transaction_ts > (SELECT MAX(transaction_ts) FROM {{ this }})
+{% endif %}
+```
+
+This avoids reprocessing historical data on each run, reducing compute costs at scale.
 
 ---
 
@@ -496,60 +538,48 @@ The pipeline includes three Looker Studio dashboards for different stakeholders:
 banking-transaction-pipeline/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                    # CI/CD pipeline
+│       └── ci.yml                    # CI/CD pipeline (lint, test, dbt parse)
 │
 ├── ingestion/
-│   ├── data/
-│   │   └── raw/
-│       │   └── LI-Medium_Trans.csv   # not committed
+│   ├── data/raw/                     # Raw CSV files (not committed)
 │   ├── load_to_gcs.py                # Upload to GCS
 │   └── load_gcs_bq.py                # Load to BigQuery
 │
 ├── orchestration/
 │   ├── dags/
-│   │   └── interbank_batch_dag.py
-│   ├── credentials/
-│   │   └── credentials.json          # not committed
+│   │   └── interbank_batch_dag.py    # Main Airflow DAG
+│   ├── credentials/                  # GCP credentials (not committed)
 │   ├── docker-compose.yml
 │   ├── Dockerfile
 │   ├── requirements.txt
-│   ├── .env                          # not committed
 │   └── .env.example
 │
 ├── dbt/
 │   ├── models/
-│   │   ├── staging/
-│   │   │   ├── stg_interbank_transactions.sql
-│   │   │   └── schema.yml
-│   │   ├── marts/
-│   │   │   ├── fact_transactions.sql
-│   │   │   ├── fact_transactions_daily.sql
-│   │   │   ├── dim_bank.sql
-│   │   │   ├── dim_currency.sql
-│   │   │   ├── rpt_hourly_volume.sql
-│   │   │   ├── rpt_currency_flow.sql
-│   │   │   ├── rpt_bank_flow_matrix.sql
-│   │   │   ├── rpt_risk_summary.sql
-│   │   │   ├── rpt_pipeline_health.sql
-│   │   │   └── schema.yml
-│   │   └── sources.yml
+│   │   ├── staging/                  # Data cleaning & standardization
+│   │   ├── marts/                    # Facts, dimensions, reports
+│   │   └── sources.yml               # Source freshness configuration
 │   ├── dbt_project.yml
-│   ├── packages.yml
-│   └── profiles.yml.example
+│   └── packages.yml
+│
+├── great_expectations/               # Data quality framework
+│   ├── great_expectations.yml        # GX configuration
+│   ├── expectations/
+│   │   └── transactions_suite.json   # Validation rules
+│   └── run_validation.py             # Validation runner script
+│
+├── tests/                            # Python unit tests
+│   ├── conftest.py
+│   └── test_load_to_gcs.py
 │
 ├── infra/
-│   └── terraform/
+│   └── terraform/                    # Infrastructure as Code
 │       ├── main.tf
 │       ├── variables.tf
-│       ├── outputs.tf
-│       └── terraform.tfvars          # not committed
+│       └── outputs.tf
 │
 ├── docs/
-│   ├── DASHBOARDS.md                 # Detailed dashboard documentation
-│   └── images/
-│       ├── dashboard_executive.png
-│       ├── dashboard_operations.png
-│       └── dashboard_risk.png
+│   └── Pipeline_Architecture.png     # Architecture diagram
 │
 ├── .gitignore
 └── README.md
