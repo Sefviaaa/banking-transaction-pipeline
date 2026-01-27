@@ -52,3 +52,12 @@ jobs:
           EOF
       - name: Validate dbt project
         run: cd dbt && dbt deps && dbt parse
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pytest pytest-mock google-cloud-storage google-cloud-bigquery
+      - run: pytest tests/ -v --tb=short
