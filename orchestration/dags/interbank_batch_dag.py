@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
@@ -28,6 +29,12 @@ with DAG(
     start_date=datetime(2026, 1, 1),
     schedule="@daily",
     catchup=False,
+    max_active_runs=1,  # Prevent overlapping runs
+    default_args={
+        "retries": 2,
+        "retry_delay": timedelta(minutes=5)
+    },
+    tags=["banking", "batch", "production"],
 ) as dag:
 
     ingest_to_gcs = BashOperator(
