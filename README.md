@@ -1,4 +1,4 @@
-# Banking Transaction Data Pipeline
+# Banking Transaction ETL Data Pipeline
 
 This project implements an **end-to-end batch data engineering pipeline** for processing inter-bank payment transactions.
 It demonstrates how banking transaction data can be ingested, stored, transformed, and aggregated into analytics-ready tables using **industry-standard tooling and best practices**.
