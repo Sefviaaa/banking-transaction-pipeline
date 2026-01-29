@@ -28,7 +28,7 @@ resource "google_bigquery_dataset" "raw" {
 }
 
 resource "google_bigquery_dataset" "staging" {
-  dataset_id = "interbank_dbt_dev"
+  dataset_id = "interbank_dev"
   location   = var.region
 }
 

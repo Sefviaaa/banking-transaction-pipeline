@@ -111,10 +111,11 @@ Looker Studio Dashboards
 
 ```
 Airflow DAG: interbank_batch_pipeline
-└── ingest_to_gcs           # Upload CSV to Cloud Storage
-    └── load_gcs_to_bigquery    # Load raw data to BigQuery
-        └── validate_data_quality   # Great Expectations checks
-            └── trigger_dbt_cloud_job   # Run transformations
+└── ingest_to_gcs
+    └── load_gcs_to_bigquery
+        └── validate_data_quality
+            └── run_dbt_transformations
+                └── run_dbt_tests
 ```
 
 ---
@@ -128,8 +129,8 @@ Airflow DAG: interbank_batch_pipeline
 | Data Warehouse | BigQuery | Analytical queries |
 | Infrastructure | Terraform | Infrastructure as Code |
 | Orchestration | Apache Airflow | Workflow scheduling |
-| Transformation | dbt Cloud | SQL-based transformations |
-| Data Quality | Great Expectations | Data validation framework |
+| Transformation | dbt Core | SQL-based transformations |
+| Data Quality | Great Expectations | Data validation |
 | Ingestion | Python | Data loading scripts |
 | Containerization | Docker | Local reproducible runtime |
 | Visualization | Looker Studio | Reporting dashboards |
@@ -146,7 +147,6 @@ Before you begin, ensure you have the following installed:
 - [ ] [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) (gcloud CLI)
 - [ ] [Python](https://www.python.org/downloads/) (v3.9+)
 - [ ] A [GCP Account](https://cloud.google.com/) with billing enabled
-- [ ] A [dbt Cloud Account](https://www.getdbt.com/product/dbt-cloud) (free tier available)
 
 ---
 
@@ -197,16 +197,20 @@ git clone https://github.com/Sefviaaa/banking-transaction-pipeline.git
 cd banking-transaction-pipeline
 ```
 
-### Step 2: Download the Dataset
+### Step 2: Download and Prepare the Dataset
 
 1. Go to [Kaggle - IBM Transactions for AML](https://www.kaggle.com/datasets/ealtman2019/ibm-transactions-for-anti-money-laundering-aml)
 2. Download `LI-Medium_Trans.csv`
-3. Create the data directory and move the file:
+3. Create the data directory and compress the file (faster uploads to GCS):
 
 ```bash
 mkdir -p ingestion/data/raw
 mv ~/Downloads/LI-Medium_Trans.csv ingestion/data/raw/
+cd ingestion/data/raw
+gzip LI-Medium_Trans.csv  # Creates LI-Medium_Trans.csv.gz (~600MB vs 3GB)
 ```
+
+> **Note:** The pipeline uses the compressed `.gz` file for faster GCS uploads. BigQuery can load `.gz` files directly.
 
 ### Step 3: Set Up Google Cloud Platform
 
@@ -282,36 +286,20 @@ Your `.env` file should contain:
 # GCP Configuration
 GCP_PROJECT_ID=your-project-id
 GCS_RAW_BUCKET=your-unique-bucket-name
+BQ_DATASET_ID=interbank_raw
+BQ_TABLE_ID=transactions
 GOOGLE_APPLICATION_CREDENTIALS=/opt/airflow/google/credentials.json
-
-# dbt Cloud Configuration
-DBT_CLOUD_ACCOUNT_ID=your_dbt_account_id
-DBT_CLOUD_API_TOKEN=your_dbt_api_token
-DBT_CLOUD_JOB_ID=your_dbt_job_id
 
 # Airflow Security
 AIRFLOW_SECRET_KEY=your-secure-random-string-here
 ```
 
-### Step 6: Set Up dbt Cloud
+### Step 6: Set Up dbt Profile
 
-1. **Create a dbt Cloud account** at [getdbt.com](https://www.getdbt.com/)
-2. **Connect your repository** to dbt Cloud
-3. **Configure BigQuery connection** in dbt Cloud:
-   - Upload your service account JSON key
-   - Set the project and dataset
-4. **Create a dbt Cloud job** and note the Job ID
-5. **Generate an API token** from dbt Cloud settings
-6. **Update your `.env`** with the dbt Cloud credentials
-
-### Step 7: Set Up dbt Profile (for local development)
-
-If you want to run dbt locally (optional):
+Create a `profiles.yml` in the `dbt/` directory:
 
 ```bash
-mkdir -p ~/.dbt
-
-cat > ~/.dbt/profiles.yml << EOF
+cat > dbt/profiles.yml << EOF
 banking_transaction_pipeline:
   target: dev
   outputs:
@@ -319,22 +307,16 @@ banking_transaction_pipeline:
       type: bigquery
       method: service-account
       project: your-project-id
-      dataset: interbank_dbt_dev
+      dataset: interbank
       location: US
       threads: 4
-      keyfile: /path/to/your/credentials.json
-    prod:
-      type: bigquery
-      method: service-account
-      project: your-project-id
-      dataset: interbank_prod
-      location: US
-      threads: 4
-      keyfile: /path/to/your/credentials.json
+      keyfile: /opt/airflow/google/credentials.json
 EOF
 ```
 
-### Step 8: Start the Pipeline
+> **Note:** The `keyfile` path matches the Docker volume mount in `docker-compose.yml`.
+
+### Step 7: Start the Pipeline
 
 ```bash
 cd orchestration
@@ -346,7 +328,7 @@ docker compose up -d
 docker compose logs -f
 ```
 
-### Step 9: Access Airflow and Trigger the Pipeline
+### Step 8: Access Airflow and Trigger the Pipeline
 
 1. Open **http://localhost:8080** in your browser
 2. Login with:
@@ -356,31 +338,29 @@ docker compose logs -f
 4. Toggle the DAG **ON**
 5. Click **Trigger DAG** to run manually
 
-### Step 10: Verify the Results
+### Step 9: Verify the Results
 
 ```bash
-# Check BigQuery for data
+# Check BigQuery for raw data
 bq query --use_legacy_sql=false \
   'SELECT COUNT(*) FROM `your-project-id.interbank_raw.transactions`'
 
-# Check dbt Cloud for transformation results
+# Check dbt transformation results
 bq query --use_legacy_sql=false \
-  'SELECT * FROM `your-project-id.interbank_prod.fact_transactions_daily` LIMIT 10'
+  'SELECT * FROM `your-project-id.interbank.fact_transactions_daily` LIMIT 10'
 ```
 
 ---
 
 ## dbt Transformations
 
-The Airflow DAG triggers a **dbt Cloud job** via API.
+The Airflow DAG runs **dbt Core CLI** commands directly inside the Docker container.
 
-### What the dbt job does
+### What the dbt tasks do
 
-* Runs staging models
-* Builds dimension tables
-* Aggregates daily transaction facts
-* Produces reporting tables
-* Executes dbt tests
+* `dbt deps` - Installs dbt packages (dbt_utils, codegen)
+* `dbt run` - Runs staging models, builds dimension/fact tables, produces reporting tables
+* `dbt test` - Executes data quality tests
 
 ### Data Model Architecture
 
