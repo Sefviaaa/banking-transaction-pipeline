@@ -36,6 +36,7 @@ SCHEMA = [
             bigquery.SchemaField("is_laundering", "INTEGER"),
         ]
 
+
 def ensure_dataset(client: bigquery.Client, dataset_id: str) -> None:
     """
     Dataset creation

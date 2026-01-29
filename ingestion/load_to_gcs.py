@@ -24,10 +24,10 @@ def upload_to_gcs():
 
     if not os.path.exists(LOCAL_DATA_PATH):
         raise FileNotFoundError(f"Source file not found: {LOCAL_DATA_PATH}")
-    
+
     ingestion_date = datetime.utcnow().strftime("%Y-%m-%d")
     destination_blob = f"{GCS_BASE_PATH}/ingestion_date={ingestion_date}/transactions.csv"
-    
+
     try:
         client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
