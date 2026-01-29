@@ -9,9 +9,10 @@ logger = logging.getLogger(__name__)
 
 # Configuration from environment variables
 PROJECT_ID = os.environ.get("GCP_PROJECT_ID")
-DATASET_ID = os.environ.get("BQ_DATASET_ID", "interbank_raw")
-TABLE_ID = os.environ.get("BQ_TABLE_ID", "transactions")
+DATASET_ID = os.environ.get("BQ_DATASET_ID")
+TABLE_ID = os.environ.get("BQ_TABLE_ID")
 BUCKET_NAME = os.environ.get("GCS_RAW_BUCKET")
+GCS_BASE_PATH = "raw/interbank_transactions"
 
 # Validate required environment variables
 if not PROJECT_ID:
@@ -19,12 +20,25 @@ if not PROJECT_ID:
 if not BUCKET_NAME:
     raise ValueError("GCS_RAW_BUCKET environment variable not set")
 
-GCS_URI = f"gs://{BUCKET_NAME}/raw/interbank_transactions/ingestion_date=*/transactions.csv"
+GCS_URI = f"gs://{BUCKET_NAME}/{GCS_BASE_PATH}/ingestion_date=*/transactions.csv"
 
+SCHEMA = [
+            bigquery.SchemaField("timestamp", "TIMESTAMP"),
+            bigquery.SchemaField("from_bank", "STRING"),
+            bigquery.SchemaField("from_account", "STRING"),
+            bigquery.SchemaField("to_bank", "STRING"),
+            bigquery.SchemaField("to_account", "STRING"),
+            bigquery.SchemaField("amount_received", "FLOAT"),
+            bigquery.SchemaField("receiving_currency", "STRING"),
+            bigquery.SchemaField("amount_paid", "FLOAT"),
+            bigquery.SchemaField("payment_currency", "STRING"),
+            bigquery.SchemaField("payment_format", "STRING"),
+            bigquery.SchemaField("is_laundering", "INTEGER"),
+        ]
 
-def ensure_dataset(client, dataset_id):
+def ensure_dataset(client: bigquery.Client, dataset_id: str) -> None:
     """
-    Correct and safe dataset creation
+    Dataset creation
     """
     dataset_ref = bigquery.DatasetReference(PROJECT_ID, dataset_id)
 
@@ -47,27 +61,11 @@ def load_gcs_to_bq():
         logger.info("Starting BigQuery load operation")
         client = bigquery.Client(project=PROJECT_ID)
 
-        # 1️⃣ ENSURE DATASET EXISTS
         ensure_dataset(client, DATASET_ID)
-
-        # 2️⃣ DEFINE SCHEMA
-        schema = [
-            bigquery.SchemaField("timestamp", "TIMESTAMP"),
-            bigquery.SchemaField("from_bank", "STRING"),
-            bigquery.SchemaField("from_account", "STRING"),
-            bigquery.SchemaField("to_bank", "STRING"),
-            bigquery.SchemaField("to_account", "STRING"),
-            bigquery.SchemaField("amount_received", "FLOAT"),
-            bigquery.SchemaField("receiving_currency", "STRING"),
-            bigquery.SchemaField("amount_paid", "FLOAT"),
-            bigquery.SchemaField("payment_currency", "STRING"),
-            bigquery.SchemaField("payment_format", "STRING"),
-            bigquery.SchemaField("is_laundering", "INTEGER"),
-        ]
 
         # 3️⃣ LOAD CONFIG
         job_config = bigquery.LoadJobConfig(
-            schema=schema,
+            schema=SCHEMA,
             source_format=bigquery.SourceFormat.CSV,
             skip_leading_rows=1,
             write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,

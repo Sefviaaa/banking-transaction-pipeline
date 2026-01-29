@@ -1,0 +1,12 @@
+banking_transaction_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: noted-aloe-481504-u4          # ← Replace with your project
+      dataset: interbank_dev              # ← Replace (e.g., dbt_staging
+      keyfile: /opt/airflow/google/credentials.json
+      threads: 4
+      timeout_seconds: 300
+      location: US                           # ← Your BigQuery region
